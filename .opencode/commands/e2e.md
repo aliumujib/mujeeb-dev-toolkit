@@ -1,5 +1,5 @@
 ---
-description: E2E test coverage with Playwright and Dex tracking
+description: E2E test coverage with Playwright and task tracking
 agent: build
 ---
 
@@ -20,7 +20,7 @@ You are now in a 2-phase E2E test workflow.
 | Phase | Name | Required Marker | Next Phase |
 |-------|------|-----------------|------------|
 | 1 | Flow Analysis | `<phase_complete phase="1"/>` | 2 |
-| 2 | Dex Handoff | `<phase_complete phase="2"/>` | done |
+| 2 | Task Handoff | `<phase_complete phase="2"/>` | done |
 
 ---
 
@@ -39,33 +39,26 @@ Focus on:
 
 ---
 
-## Phase 2: Dex Handoff
+## Phase 2: Task Handoff
 
-Create Dex epic, then tasks for each flow:
+Use `todowrite` to create tasks for each critical flow:
 
-```bash
-# Create epic
-dex create "E2E Test Coverage" --description "Critical user flow coverage"
-
-# For each flow
-dex create "E2E: checkout flow" --parent <epic-id> --description "
-Flow: Browse -> Cart -> Checkout -> Confirmation
-
-Steps:
-1. Add product to cart
-2. Proceed to checkout
-3. Fill payment form
-4. Complete purchase
-
-Files:
-- e2e/checkout.e2e.page.ts
-- e2e/checkout.e2e.ts
-
-Acceptance:
-- [ ] Page object with semantic locators
-- [ ] Test covers happy path
-"
+```json
+// Use todowrite with:
+{
+  "todos": [
+    {"id": "e2e-1", "content": "E2E: checkout flow - Browse→Cart→Checkout→Confirmation", "status": "pending", "priority": "high"},
+    {"id": "e2e-2", "content": "E2E: auth flow - Login, logout, session persistence", "status": "pending", "priority": "high"},
+    {"id": "e2e-3", "content": "E2E: settings flow - Profile update, password change", "status": "pending", "priority": "medium"}
+  ]
+}
 ```
+
+Each todo should include:
+- Flow name and key steps
+- Priority based on criticality
+
+Confirm tasks with `todoread`.
 
 **Output:** `<phase_complete phase="2"/>` or `<promise>E2E SETUP COMPLETE</promise>`
 

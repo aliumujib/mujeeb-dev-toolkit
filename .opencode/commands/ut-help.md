@@ -14,22 +14,19 @@ The agent:
 2. Identifies files with low coverage
 3. Prioritizes 3-7 test tasks focusing on user-facing behavior
 
-## Phase 2: Dex Handoff
+## Phase 2: Task Handoff
 
 The agent:
-1. Creates a Dex epic tracking the coverage goal
-2. Creates individual tasks for each test to write
-3. Sets up dependencies between tasks
+1. Creates todos for each test to write using `todowrite`
+2. Each task includes file path, current coverage, and behaviors to test
 
 ## After Setup
 
 You work through tasks one at a time:
-```bash
-dex list --ready        # See available tasks
-dex start <id>          # Claim a task
-# Write the test
-/complete <id>          # Review, commit, mark done
-```
+1. View tasks with `todoread`
+2. Mark task as in_progress with `todowrite`
+3. Write the test
+4. Run `/complete` to review, commit, mark done
 
 ## Key Principles
 

@@ -195,7 +195,7 @@ Phases:
   1. Input Classification
   2. Interview + Exploration (then research/expert agents)
   3. Spec Write (with Implementation Stories section)
-  4. Dex Handoff (create tasks from stories)
+  4. Task Handoff (create tasks from stories with todowrite)
 
 Current phase: 1 - Input Classification
 EOF

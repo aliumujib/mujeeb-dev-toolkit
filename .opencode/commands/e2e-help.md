@@ -14,22 +14,19 @@ The agent:
 2. Identifies critical user flows needing E2E coverage
 3. Prioritizes 3-7 test tasks
 
-## Phase 2: Dex Handoff
+## Phase 2: Task Handoff
 
 The agent:
-1. Creates a Dex epic for E2E coverage
-2. Creates individual tasks for each flow to test
-3. Each task includes page object + test file
+1. Creates todos for each flow to test using `todowrite`
+2. Each task includes flow description and key steps
 
 ## After Setup
 
 You work through tasks one at a time:
-```bash
-dex list --ready        # See available tasks
-dex start <id>          # Claim a task
-# Write page object + test
-/complete <id>          # Review, commit, mark done
-```
+1. View tasks with `todoread`
+2. Mark task as in_progress with `todowrite`
+3. Write page object + test
+4. Run `/complete` to review, commit, mark done
 
 ## File Convention
 

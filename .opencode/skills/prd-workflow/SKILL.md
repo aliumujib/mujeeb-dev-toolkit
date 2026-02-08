@@ -1,6 +1,6 @@
 ---
 name: prd-workflow
-description: Use when planning features, creating PRDs, interviewing about requirements, defining stories, writing specs, or breaking down features into tasks. Covers the PRD interview process, spec structure, story atomization, and 4-phase workflow from idea to Dex tasks.
+description: Use when planning features, creating PRDs, interviewing about requirements, defining stories, writing specs, or breaking down features into tasks. Covers the PRD interview process, spec structure, story atomization, and 4-phase workflow from idea to tracked tasks.
 ---
 
 # PRD Workflow - Feature Planning
@@ -25,7 +25,7 @@ implementable stories through structured interview, research, and specification.
 | 1 | Input Classification | Identify feature name and type |
 | 2 | Interview + Exploration | Gather requirements, then run research/expert agents |
 | 3 | Spec Write | Create specification with Implementation Stories section |
-| 4 | Dex Handoff | Parse stories into Dex tasks |
+| 4 | Task Handoff | Create tasks from stories using todowrite |
 
 **Key Change:** Research and expert agents run after interview completes (blocking). Findings are reviewed before spec writing.
 
@@ -113,36 +113,38 @@ Each story must be completable in ONE task (~15-30 min):
 - **Independently testable** - Can verify in isolation
 - **Cleanly revertible** - Can undo without cascade
 
-## Phase 4: Dex Handoff
+## Phase 4: Task Handoff
 
-Use `dex plan` to automatically create tasks from the spec:
+Use OpenCode's native `todowrite` to create tasks from the spec's Implementation Stories:
 
-```bash
-dex plan plans/<feature>/spec.md
+1. **Parse stories from spec** - Read each story from the Implementation Stories section
+2. **Create todos** - Use `todowrite` to create a task for each story with:
+   - `id`: Unique identifier (e.g., `story-1`, `story-2`)
+   - `content`: Story title and key acceptance criteria
+   - `status`: `pending`
+   - `priority`: Based on blocked-by relationships (`high` for unblocked, `medium` for blocked)
+
+Example todowrite call:
+```json
+{
+  "todos": [
+    {"id": "story-1", "content": "Setup auth middleware - AC: JWT validation, route protection", "status": "pending", "priority": "high"},
+    {"id": "story-2", "content": "Login endpoint - AC: email/password, token response", "status": "pending", "priority": "high"},
+    {"id": "story-3", "content": "Password reset flow - AC: email trigger, reset link", "status": "pending", "priority": "medium"}
+  ]
+}
 ```
 
-This automatically:
-- Creates parent task from spec title
-- Analyzes Implementation Stories section
-- Generates subtasks with proper hierarchy
-- Sets blocked-by relationships from "Blocked by:" lines
-
-Verify tasks created:
-```bash
-dex status
-dex list
-```
+3. **Confirm with user** - Show the created tasks and ask if ready to start
 
 ## After PRD Completion
 
-Use Dex for execution:
+Work through tasks using the todo system:
 
-```bash
-dex status              # Dashboard view
-dex list --ready        # See unblocked tasks
-dex start <id>          # Claim a task
-/complete <id>          # Run reviewers and complete
-```
+1. **View tasks** - Use `todoread` or see them in the TUI
+2. **Start a task** - Mark as `in_progress` with `todowrite`
+3. **Complete work** - Use `/complete` to run reviewers and commit
+4. **Mark done** - Update status to `completed` with `todowrite`
 
 ## Command Reference
 
@@ -154,6 +156,6 @@ dex start <id>          # Claim a task
 
 ## Related Commands
 
-- `/complete` - Complete task with reviewer workflow
-- `dex list` - View pending tasks
-- `dex sync` - Sync with GitHub issues
+- `/complete` - Run reviewers, commit, mark task complete
+- `todoread` - View current tasks
+- `todowrite` - Update task status

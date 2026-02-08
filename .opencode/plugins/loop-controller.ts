@@ -38,7 +38,7 @@ const LOOP_CONFIGS: Record<string, PhaseConfig> = {
     prompts: {
       2: "Continue to Phase 2: Interview + Exploration. Ask 8-10 questions covering core problem, success criteria, MVP scope, technical constraints, UX flows, edge cases, error states, and tradeoffs.",
       3: "Continue to Phase 3: Spec Write. Write a comprehensive specification to plans/{feature_name}/spec.md including Implementation Stories section.",
-      4: "Continue to Phase 4: Dex Handoff. Use `dex plan` to create tasks from the spec's Implementation Stories section.",
+      4: "Continue to Phase 4: Task Handoff. Use todowrite to create tasks from the spec's Implementation Stories section. Each story becomes a todo item with id, content (title + key acceptance criteria), status: pending, and priority based on dependencies.",
     },
     completionCheck: (state, directory) => {
       // Phase 3 auto-completes if spec file exists
@@ -52,13 +52,13 @@ const LOOP_CONFIGS: Record<string, PhaseConfig> = {
   ut: {
     maxPhase: 2,
     prompts: {
-      2: "Continue to Phase 2: Dex Handoff. Create a Dex epic with the coverage target, then individual tasks for each test gap identified.",
+      2: "Continue to Phase 2: Task Handoff. Use todowrite to create tasks for each test gap identified. Include file path, current coverage, and key test scenarios in each task content.",
     },
   },
   e2e: {
     maxPhase: 2,
     prompts: {
-      2: "Continue to Phase 2: Dex Handoff. Create a Dex epic for E2E coverage, then individual tasks for each critical user flow.",
+      2: "Continue to Phase 2: Task Handoff. Use todowrite to create tasks for each critical user flow. Include flow description and key steps in each task content.",
     },
   },
 }

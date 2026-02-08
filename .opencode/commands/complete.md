@@ -1,25 +1,21 @@
 ---
-description: Run reviewers and mark Dex task complete
+description: Run reviewers, commit, and mark task complete
 agent: build
 ---
 
 # Complete Task Workflow
 
-This command runs the standard review workflow then marks a Dex task complete.
+This command runs the standard review workflow and marks a task complete.
 
 ## Usage
 
 ```
-/complete <task-id>
+/complete [task-description]
 ```
 
 ## Workflow
 
-1. **Get task details and mark in-progress**:
-```bash
-dex show $1 --full
-dex start $1
-```
+1. **Check current task** - Use `todoread` to see in-progress task
 
 2. **Run reviewers in parallel** (use @mentions to invoke subagents):
 
@@ -30,24 +26,35 @@ dex start $1
 
 3. **Address ALL findings** from reviewers
 
-4. **Commit** with task reference:
+4. **Run quality checks**:
 ```bash
-git commit -m "feat(<scope>): $1 - <title>"
+# Run tests
+npm test  # or appropriate test command
+
+# Run lint/typecheck
+npm run lint && npm run typecheck  # adjust for project
 ```
 
-5. **Mark task complete with verified result**:
+5. **Commit** with descriptive message:
 ```bash
-dex complete $1 --result "What changed: <implementation summary>. Verification: <N> tests passing, build success, lint clean."
+git add -A
+git commit -m "feat(<scope>): <what changed>"
 ```
 
-**Result must include verification, not claims:**
-- Good: "Added login endpoint. 24 tests passing. Build success."
-- Bad: "Should work now" or "Made the changes"
+**Commit message should include verification:**
+- Good: "feat(auth): add login endpoint - 24 tests passing"
+- Bad: "fix stuff" or "made changes"
 
-6. **Show next ready task**:
-```bash
-dex list --ready
+6. **Mark task complete** using `todowrite`:
+```json
+{
+  "todos": [
+    {"id": "<task-id>", "content": "<task>", "status": "completed", "priority": "high"}
+  ]
+}
 ```
+
+7. **Show remaining tasks** - Use `todoread` to see what's next
 
 ## Quality Gates
 
@@ -56,9 +63,9 @@ All must pass before marking complete:
 - [ ] Tests pass
 - [ ] Lint/typecheck pass
 - [ ] Reviewers ran and findings addressed
-- [ ] Committed with task reference
+- [ ] Changes committed
 
 ## Notes
 
-- If `<task-id>` not provided, check `dex list --in-progress` for current task
-- Use `dex list --ready` to see unblocked tasks
+- Use `todoread` to see current tasks and their status
+- One task at a time - complete current before starting next

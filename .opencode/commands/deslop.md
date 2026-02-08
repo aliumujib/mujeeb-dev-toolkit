@@ -15,17 +15,32 @@ git diff main --name-only
 
 If an argument was provided ($ARGUMENTS), focus only on that file.
 
-Now read over all of the new code with "fresh eyes".
+## Step 2: Create todos for each file
 
-## Step 2: For each file, compare with original
+Use `todowrite` to create a task for each changed file:
 
-For each changed file:
+```json
+{
+  "todos": [
+    {"id": "deslop-1", "content": "Deslop: src/auth/login.ts", "status": "pending", "priority": "high"},
+    {"id": "deslop-2", "content": "Deslop: src/auth/session.ts", "status": "pending", "priority": "high"},
+    {"id": "deslop-3", "content": "Deslop: src/utils/helpers.ts", "status": "pending", "priority": "medium"}
+  ]
+}
+```
+
+## Step 3: For each file (work through todos)
+
+For each file, mark the todo as `in_progress`, then:
 
 1. Read the current version
 2. Get the original from main: `git show main:<filepath>`
-3. Compare style, patterns, and conventions, looking carefully for any obvious bugs, errors, problems, issues, confusion, etc.
+3. Compare style, patterns, and conventions
+4. Look carefully for bugs, errors, problems, issues, confusion
+5. Apply fixes (see slop patterns below)
+6. Mark todo as `completed`
 
-## Step 3: Remove slop
+## Slop Patterns to Remove
 
 Use Edit tool to remove:
 
@@ -61,6 +76,6 @@ Use Edit tool to remove:
 
 ## Step 4: Report
 
-Output ONLY a 1-3 sentence summary. No bullet points, no file lists, no explanations.
+After all todos are completed, output ONLY a 1-3 sentence summary. No bullet points, no file lists, no explanations.
 
 Example: "Removed 4 redundant comments and 2 unnecessary null checks. Simplified error handling in auth.ts."
