@@ -25,8 +25,8 @@ if ! command -v qmd &>/dev/null; then
 fi
 
 install_launchd() {
-    local plist_path="$HOME/Library/LaunchAgents/com.claude.session-sync.plist"
-    local label="com.claude.session-sync"
+    local plist_path="$HOME/Library/LaunchAgents/com.opencode.session-sync.plist"
+    local label="com.opencode.session-sync"
 
     # Create LaunchAgents directory if needed
     mkdir -p "$HOME/Library/LaunchAgents"
@@ -63,9 +63,9 @@ install_launchd() {
         <string>$HOME</string>
     </dict>
     <key>StandardOutPath</key>
-    <string>$HOME/.claude/session-sync.log</string>
+    <string>$HOME/.opencode/session-sync.log</string>
     <key>StandardErrorPath</key>
-    <string>$HOME/.claude/session-sync.log</string>
+    <string>$HOME/.opencode/session-sync.log</string>
     <key>RunAtLoad</key>
     <true/>
 </dict>
@@ -78,16 +78,16 @@ EOF
     echo "✓ Installed launchd scheduler"
     echo "  Schedule: Every 30 minutes"
     echo "  Plist: $plist_path"
-    echo "  Logs: ~/.claude/session-sync.log"
+    echo "  Logs: ~/.opencode/session-sync.log"
     echo ""
-    echo "To verify: launchctl list | grep claude.session-sync"
+    echo "To verify: launchctl list | grep opencode.session-sync"
     echo "To uninstall: ./scripts/uninstall-scheduled-sync.sh"
 }
 
 install_cron() {
     # Build PATH that includes common qmd install locations for Linux/WSL
     local path_value="$HOME/.bun/bin:$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin"
-    local cron_cmd="*/30 * * * * PATH=$path_value $SYNC_SCRIPT >> $HOME/.claude/session-sync.log 2>&1"
+    local cron_cmd="*/30 * * * * PATH=$path_value $SYNC_SCRIPT >> $HOME/.opencode/session-sync.log 2>&1"
     local cron_marker="# claude-session-sync"
 
     # Use temp file for reliable cron installation (pipe approach unreliable on some systems)
@@ -99,7 +99,7 @@ install_cron() {
 
     echo "✓ Installed cron scheduler"
     echo "  Schedule: Every 30 minutes"
-    echo "  Logs: ~/.claude/session-sync.log"
+    echo "  Logs: ~/.opencode/session-sync.log"
     echo ""
     echo "To verify: crontab -l | grep session-sync"
     echo "To uninstall: ./scripts/uninstall-scheduled-sync.sh"
@@ -119,7 +119,7 @@ install_cron() {
         local cron_line='pgrep -x cron >/dev/null || sudo service cron start'
         if ! grep -qF "pgrep -x cron" "$rc_file" 2>/dev/null; then
             echo "" >> "$rc_file"
-            echo "# Auto-start cron for scheduled tasks (added by claude plugin)" >> "$rc_file"
+            echo "# Auto-start cron for scheduled tasks (added by opencode plugin)" >> "$rc_file"
             echo "$cron_line" >> "$rc_file"
             echo "  ✓ Added cron auto-start to $rc_file"
         else
