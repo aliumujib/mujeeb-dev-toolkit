@@ -35,7 +35,7 @@ Use **file existence as primary truth** (ralph-loop pattern). Markers are for ex
 | 1 | Input Classification | `<phase_complete phase="1"/>` | `feature_name` (required) | 2 |
 | 2 | Interview + Exploration | `<phase_complete phase="2"/>` | none | 3 |
 | 3 | Spec Write | `<phase_complete phase="3"/>` | `spec_path` (required) | 4 |
-| 4 | Dex Handoff | `<phase_complete phase="4"/>` | none | done |
+| 4 | Task Handoff | `<phase_complete phase="4"/>` | none | done |
 
 ### Detection Priority (File > Marker)
 
@@ -66,7 +66,7 @@ Wrong:
 | Phase | Auto-Advances When |
 |-------|-------------------|
 | 3 | `plans/<feature>/spec.md` exists with stories section |
-| 4 | Dex tasks created for all stories |
+| 4 | Tasks created for all stories via todowrite |
 
 ### Exact Marker Formats
 
@@ -135,7 +135,7 @@ Output the marker immediately.
 
 ### Phase 3: Spec Write
 
-Write comprehensive spec to `plans/<feature>/spec.md`. Include a structured stories section for Dex parsing.
+Write comprehensive spec to `plans/<feature>/spec.md`. Include a structured Implementation Stories section.
 
 **Spec Structure:**
 ```markdown
@@ -193,43 +193,39 @@ Write comprehensive spec to `plans/<feature>/spec.md`. Include a structured stor
 <phase_complete phase="3" spec_path="plans/<feature>/spec.md"/>
 ```
 
-### Phase 4: Dex Handoff
+### Phase 4: Task Handoff
 
-Use `dex plan` to create tasks from the spec's Implementation Stories section.
+Use `todowrite` to create tasks from the spec's Implementation Stories section.
 
 **Steps:**
 
-1. Parse spec and create tasks:
-```bash
-dex plan plans/<feature>/spec.md
+1. Parse the spec and create todos for each story:
+```json
+// Use todowrite with:
+{
+  "todos": [
+    {"id": "story-1", "content": "Story 1: Setup auth middleware - AC: JWT validation, route protection", "status": "pending", "priority": "high"},
+    {"id": "story-2", "content": "Story 2: Login endpoint - AC: email/password validation, token response", "status": "pending", "priority": "high"},
+    {"id": "story-3", "content": "Story 3: Password reset - AC: email trigger, reset link, expiry", "status": "pending", "priority": "medium"}
+  ]
+}
 ```
 
-This automatically:
-- Creates parent task from spec title
-- Analyzes Implementation Stories section
-- Creates subtasks for each story with context
-- Reports task IDs and structure
+Each todo should include:
+- Story title
+- Key acceptance criteria (abbreviated)
+- Priority based on dependencies (high for unblocked, medium for blocked)
 
-2. Add blocked-by relationships if needed:
-```bash
-# If stories have dependencies (from "Blocked by:" in spec):
-dex edit <story2-id> --add-blocker <story1-id>
-```
+2. Confirm tasks created by using `todoread`
 
-3. Verify tasks created:
-```bash
-dex status
-dex list
-```
-
-4. Ask user what's next:
-"PRD complete! Dex tasks created. What next?"
+3. Ask user what's next:
+"PRD complete! Tasks created. What next?"
 
 Options:
 - **Start first task** - Begin implementation
 - **Done** - Review PRD first, implement later
 
-5. **AFTER user responds**, output the completion marker:
+4. **AFTER user responds**, output the completion marker:
 - If "Done": Output `<promise>PRD COMPLETE</promise>`
 - If "Start first task": Output `<phase_complete phase="4"/>` then begin implementation
 

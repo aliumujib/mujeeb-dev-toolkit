@@ -1,5 +1,5 @@
 ---
-description: Unit test coverage improvement with Dex tracking
+description: Unit test coverage improvement with task tracking
 agent: build
 ---
 
@@ -29,7 +29,7 @@ When starting on main/master, the setup script prompts:
 | Phase | Name | Required Marker | Next Phase |
 |-------|------|-----------------|------------|
 | 1 | Coverage Analysis | `<phase_complete phase="1"/>` | 2 |
-| 2 | Dex Handoff | `<phase_complete phase="2"/>` | done |
+| 2 | Task Handoff | `<phase_complete phase="2"/>` | done |
 
 ---
 
@@ -49,45 +49,32 @@ When starting on main/master, the setup script prompts:
 
 ---
 
-## Phase 2: Dex Handoff
+## Phase 2: Task Handoff
 
-Create Dex epic with target, then individual tasks.
+Use `todowrite` to create tasks for each coverage gap.
 
 **Steps:**
 
-1. Create epic with target in description:
-```bash
-dex create "Unit Test Coverage" -d "Target: N% coverage for [scope]
-
-Current: X%
-Goal: Y%"
+1. Create todos for each test task:
+```json
+// Use todowrite with:
+{
+  "todos": [
+    {"id": "test-1", "content": "Test: login validation (src/auth/login.ts, 45%) - valid/invalid credentials", "status": "pending", "priority": "high"},
+    {"id": "test-2", "content": "Test: password reset (src/auth/reset.ts, 30%) - email trigger, token validation", "status": "pending", "priority": "high"},
+    {"id": "test-3", "content": "Test: session refresh (src/auth/session.ts, 55%) - token refresh flow", "status": "pending", "priority": "medium"}
+  ]
+}
 ```
 
-2. For each identified gap, create a task:
-```bash
-dex create "Test: [specific behavior]" --parent <epic-id> -d "
-File: path/to/file.ts
-Current coverage: X%
+Each todo should include:
+- File path and current coverage
+- Key behaviors to test
+- Priority (high for critical paths)
 
-Test should verify:
-- [ ] Specific behavior 1
-- [ ] Edge case handling
+2. Confirm tasks with `todoread`
 
-Query: RTL getByRole, test user-visible behavior
-"
-```
-
-3. Set dependencies if needed:
-```bash
-dex edit <task2-id> --add-blocker <task1-id>
-```
-
-4. Confirm:
-```bash
-dex list
-```
-
-5. Ask user: "Coverage tasks created. What next?"
+3. Ask user: "Coverage tasks created. What next?"
 
 Options:
 - **Start first task** - Begin implementation
@@ -99,19 +86,14 @@ Options:
 
 ## Working on Tasks
 
-Use Dex + /complete workflow:
+Use the todo system + /complete workflow:
 
-```bash
-dex list --pending      # See what's ready
-dex start <id>          # Start working
-/complete <id>          # Run reviewers and complete
-```
-
-Each task iteration:
-1. Write ONE meaningful test
-2. Run lint, format, typecheck
-3. Run coverage to verify improvement
-4. `/complete <id>` runs reviewers, commits, marks done
+1. View tasks with `todoread`
+2. Mark task as `in_progress` with `todowrite`
+3. Write ONE meaningful test
+4. Run lint, format, typecheck
+5. Run coverage to verify improvement
+6. `/complete` runs reviewers, commits, marks done
 
 ---
 

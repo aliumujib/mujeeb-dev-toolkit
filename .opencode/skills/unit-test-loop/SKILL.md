@@ -7,17 +7,17 @@ description: Use for improving test coverage, adding unit tests, TDD, or testing
 
 **Current branch:** !`git branch --show-current 2>/dev/null || echo "not in git repo"`
 
-The unit test loop uses a 2-phase workflow with Dex task tracking for
-persistent, cross-session test coverage improvement.
+The unit test loop uses a 2-phase workflow with task tracking for
+test coverage improvement.
 
 ## The 2-Phase Approach
 
 | Phase | Name | Purpose |
 |-------|------|---------|
 | 1 | Coverage Analysis | Identify gaps, prioritize files |
-| 2 | Dex Handoff | Create epic + tasks from analysis |
+| 2 | Task Handoff | Create tasks from analysis using todowrite |
 
-After Phase 2, use `/complete <task-id>` for each test task.
+After Phase 2, use `/complete` for each test task.
 
 ## Starting the Loop
 
@@ -34,36 +34,31 @@ After Phase 2, use `/complete <task-id>` for each test task.
 
 **Output:** `<phase_complete phase="1"/>`
 
-## Phase 2: Dex Handoff
+## Phase 2: Task Handoff
 
-Create Dex epic with target, then tasks for each gap:
+Use `todowrite` to create tasks for each coverage gap:
 
-```bash
-# Create epic
-dex create "Unit Test Coverage" --description "Target: 80% coverage"
-
-# For each gap
-dex create "Test: login validation" --parent <epic-id> --description "
-File: src/auth/login.ts
-Current: 45%
-
-Test should verify:
-- [ ] Valid credentials succeed
-- [ ] Invalid credentials show error
-"
+```json
+{
+  "todos": [
+    {"id": "test-1", "content": "Test: login validation (src/auth/login.ts, 45%) - valid/invalid credentials", "status": "pending", "priority": "high"},
+    {"id": "test-2", "content": "Test: password reset (src/auth/reset.ts, 30%) - email trigger, token validation", "status": "pending", "priority": "high"},
+    {"id": "test-3", "content": "Test: session refresh (src/auth/session.ts, 55%) - token refresh flow", "status": "pending", "priority": "medium"}
+  ]
+}
 ```
 
 **Output:** `<phase_complete phase="2"/>` or `<promise>UT SETUP COMPLETE</promise>`
 
 ## Working on Tasks
 
-Use Dex + /complete workflow:
+Use the todo system + /complete workflow:
 
-```bash
-dex list --pending      # See what's ready
-dex start <id>          # Start working
-/complete <id>          # Run reviewers and complete
-```
+1. **View tasks** - Use `todoread` or see them in the TUI
+2. **Start task** - Update status to `in_progress` with `todowrite`
+3. **Write test** - Implement the test following RTL patterns
+4. **Complete** - Use `/complete` to run reviewers and commit
+5. **Mark done** - Update status to `completed` with `todowrite`
 
 ## React Testing Library Patterns
 
@@ -123,6 +118,6 @@ await screen.findByText('Loaded')  // Not: act(() => ...)
 
 ## Related
 
-- `/complete` - Run reviewers and mark Dex task complete
-- `dex list` - View pending tasks
-- `dex-workflow` skill - Full Dex usage patterns
+- `/complete` - Run reviewers, commit, mark task complete
+- `todoread` - View pending tasks
+- `todowrite` - Update task status

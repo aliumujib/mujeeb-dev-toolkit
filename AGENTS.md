@@ -8,7 +8,7 @@ This toolkit provides:
 - **Iterative loop workflows** - PRD generation, unit test coverage, E2E test planning
 - **Session memory** - Context injection from past sessions via qmd
 - **Git safety** - Blocks destructive git commands
-- **Task management** - Integration with Dex CLI for task tracking
+- **Task management** - Uses OpenCode's native todowrite/todoread for task tracking
 - **Code quality** - Deslop tool to remove AI-generated code cruft
 
 ## Key Workflows
@@ -18,26 +18,25 @@ A 4-phase workflow for generating comprehensive Product Requirement Documents:
 1. Input classification
 2. Interview + parallel research agents
 3. Spec writing to `plans/<feature>/spec.md`
-4. Dex task handoff
+4. Task handoff (creates todos from stories)
 
 ### Unit Test Loop (`/ut`)
 2-phase workflow for test coverage improvement:
 1. Coverage analysis and gap identification
-2. Dex task creation for each gap
+2. Task creation for each gap (via todowrite)
 
 ### E2E Test Loop (`/e2e`)
 2-phase workflow for end-to-end test planning:
 1. Flow analysis and critical path identification
-2. Dex task creation per flow
+2. Task creation per flow (via todowrite)
 
 ### Task Completion (`/complete`)
-Runs code reviewers, addresses findings, commits with task reference, marks Dex task complete.
+Runs code reviewers, addresses findings, commits changes, marks task complete.
 
 ## External Dependencies
 
 Some features require external tools:
 - **qmd** - Session memory search (`brew install qmd` or `cargo install qmd`)
-- **dex** - Task management CLI (`npm install -g @dcramer/dex`)
 
 ## Conventions
 

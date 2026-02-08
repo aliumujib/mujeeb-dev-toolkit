@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # E2E Test Loop Setup Script
-# Creates state file for 2-phase E2E workflow with Dex tracking
+# Creates state file for 2-phase E2E workflow with task tracking
 
 set -euo pipefail
 
@@ -15,7 +15,7 @@ CUSTOM_PROMPT_PARTS=()
 
 show_help() {
   cat << 'HELP_EOF'
-E2E Test Loop - Playwright test development with Dex task tracking
+E2E Test Loop - Playwright test development with task tracking
 
 USAGE:
   /e2e [OPTIONS] [CUSTOM PROMPT...]
@@ -31,9 +31,9 @@ CUSTOM PROMPT:
 DESCRIPTION:
   Two-phase workflow:
   Phase 1: Analyze user flows that need E2E coverage
-  Phase 2: Create Dex epic and tasks for each flow
+  Phase 2: Create tasks for each flow using todowrite
 
-  Then use /complete <task-id> for each E2E test task.
+  Then use /complete for each E2E test task.
 
 FILE NAMING:
   *.e2e.page.ts - Page objects (locators, setup, actions)
@@ -149,10 +149,10 @@ $(if [[ -n "$CUSTOM_PROMPT" ]]; then echo -e "\n## Custom Instructions\n\n$CUSTO
 3. Prioritize 3-7 test tasks
 4. Output: \`<phase_complete phase="1"/>\`
 
-## Phase 2: Dex Handoff
+## Phase 2: Task Handoff
 
-Create Dex epic, then tasks for each flow.
-Use /complete <task-id> for each E2E test.
+Use todowrite to create tasks for each flow.
+Use /complete for each E2E test.
 
 ## File Naming
 
@@ -171,7 +171,7 @@ $(if [[ -n "$CUSTOM_PROMPT" ]]; then echo "Custom: $CUSTOM_PROMPT"; fi)
 
 Workflow:
 1. Phase 1: Analyze user flows
-2. Phase 2: Create Dex tasks
+2. Phase 2: Create tasks with todowrite
 3. Use /complete for each task
 
 To cancel: /cancel-e2e

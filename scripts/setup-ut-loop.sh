@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Unit Test Loop Setup Script
-# Creates state file for 2-phase unit test workflow with Dex tracking
+# Creates state file for 2-phase unit test workflow with task tracking
 
 set -euo pipefail
 
@@ -16,7 +16,7 @@ CUSTOM_PROMPT_PARTS=()
 
 show_help() {
   cat << 'HELP_EOF'
-Unit Test Loop - Coverage improvement with Dex task tracking
+Unit Test Loop - Coverage improvement with task tracking
 
 USAGE:
   /ut [OPTIONS] [CUSTOM PROMPT...]
@@ -33,9 +33,9 @@ CUSTOM PROMPT:
 DESCRIPTION:
   Two-phase workflow:
   Phase 1: Analyze coverage gaps, prioritize files to test
-  Phase 2: Create Dex epic and tasks for each gap
+  Phase 2: Create tasks for each gap using todowrite
 
-  Then use /complete <task-id> for each test task.
+  Then use /complete for each test task.
 
 EXAMPLES:
   /ut --target 80%
@@ -175,10 +175,10 @@ $(if [[ -n "$CUSTOM_PROMPT" ]]; then echo -e "\n## Custom Instructions\n\n$CUSTO
 3. Prioritize 3-7 test tasks for user-facing behavior
 4. Output: \`<phase_complete phase="1"/>\`
 
-## Phase 2: Dex Handoff
+## Phase 2: Task Handoff
 
-Create Dex epic with target, then tasks for each gap.
-Use /complete <task-id> for each test.
+Use todowrite to create tasks for each coverage gap.
+Use /complete for each test.
 EOF
 
 # Output setup message
@@ -192,7 +192,7 @@ $(if [[ -n "$CUSTOM_PROMPT" ]]; then echo "Custom: $CUSTOM_PROMPT"; fi)
 
 Workflow:
 1. Phase 1: Analyze coverage gaps
-2. Phase 2: Create Dex tasks
+2. Phase 2: Create tasks with todowrite
 3. Use /complete for each task
 
 To cancel: /cancel-ut

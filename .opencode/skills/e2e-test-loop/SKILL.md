@@ -7,17 +7,17 @@ description: Use for browser tests, Playwright tests, end-to-end testing, or tes
 
 **Current branch:** !`git branch --show-current 2>/dev/null || echo "not in git repo"`
 
-The E2E test loop uses a 2-phase workflow with Dex task tracking for
-persistent, cross-session browser test development.
+The E2E test loop uses a 2-phase workflow with task tracking for
+browser test development.
 
 ## The 2-Phase Approach
 
 | Phase | Name | Purpose |
 |-------|------|---------|
 | 1 | Flow Analysis | Identify critical user flows |
-| 2 | Dex Handoff | Create epic + tasks per flow |
+| 2 | Task Handoff | Create tasks per flow using todowrite |
 
-After Phase 2, use `/complete <task-id>` for each E2E test task.
+After Phase 2, use `/complete` for each E2E test task.
 
 ## Starting the Loop
 
@@ -39,45 +39,31 @@ Focus on:
 
 **Output:** `<phase_complete phase="1"/>`
 
-## Phase 2: Dex Handoff
+## Phase 2: Task Handoff
 
-Create Dex epic, then tasks for each flow:
+Use `todowrite` to create tasks for each critical flow:
 
-```bash
-# Create epic
-dex create "E2E Test Coverage" --description "Critical user flow coverage"
-
-# For each flow
-dex create "E2E: checkout flow" --parent <epic-id> --description "
-Flow: Browse → Cart → Checkout → Confirmation
-
-Steps:
-1. Add product to cart
-2. Proceed to checkout
-3. Fill payment form
-4. Complete purchase
-
-Files:
-- e2e/checkout.e2e.page.ts
-- e2e/checkout.e2e.ts
-
-Acceptance:
-- [ ] Page object with semantic locators
-- [ ] Test covers happy path
-"
+```json
+{
+  "todos": [
+    {"id": "e2e-1", "content": "E2E: checkout flow - Browse→Cart→Checkout→Confirmation", "status": "pending", "priority": "high"},
+    {"id": "e2e-2", "content": "E2E: auth flow - Login, logout, session persistence", "status": "pending", "priority": "high"},
+    {"id": "e2e-3", "content": "E2E: settings flow - Profile update, password change", "status": "pending", "priority": "medium"}
+  ]
+}
 ```
 
 **Output:** `<phase_complete phase="2"/>` or `<promise>E2E SETUP COMPLETE</promise>`
 
 ## Working on Tasks
 
-Use Dex + /complete workflow:
+Use the todo system + /complete workflow:
 
-```bash
-dex list --pending      # See what's ready
-dex start <id>          # Start working
-/complete <id>          # Run reviewers and complete
-```
+1. **View tasks** - Use `todoread` or see them in the TUI
+2. **Start task** - Update status to `in_progress` with `todowrite`
+3. **Write test** - Create page object + test file
+4. **Complete** - Use `/complete` to run reviewers and commit
+5. **Mark done** - Update status to `completed` with `todowrite`
 
 ## File Naming Convention
 
@@ -162,6 +148,6 @@ await page.waitForResponse('**/api/data')
 
 ## Related
 
-- `/complete` - Run reviewers and mark Dex task complete
-- `dex list` - View pending tasks
-- `dex-workflow` skill - Full Dex usage patterns
+- `/complete` - Run reviewers, commit, mark task complete
+- `todoread` - View pending tasks
+- `todowrite` - Update task status
