@@ -138,17 +138,17 @@ if [[ -z "$TEST_COMMAND" ]]; then
   TEST_COMMAND="npm test -- --coverage"
 fi
 
-# Create .claude directory if needed
-mkdir -p .claude
+# Create .opencode directory if needed
+mkdir -p .opencode
 
 # Read session_id
-SESSION_ID=$(cat .claude/.current_session 2>/dev/null || echo "default")
+SESSION_ID=$(cat .opencode/.current_session 2>/dev/null | jq -r '.session_id // "default"' 2>/dev/null || echo "default")
 
 # Branch setup - prompt user if on main/master
 prompt_feature_branch "test/unit-coverage"
 
 # Create state file for hook routing
-STATE_FILE=".claude/ut-loop-${SESSION_ID}.local.md"
+STATE_FILE=".opencode/ut-loop-${SESSION_ID}.local.md"
 cat > "$STATE_FILE" <<EOF
 ---
 loop_type: "ut"

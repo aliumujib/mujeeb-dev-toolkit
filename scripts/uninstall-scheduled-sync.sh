@@ -6,8 +6,8 @@
 set -euo pipefail
 
 uninstall_launchd() {
-    local plist_path="$HOME/Library/LaunchAgents/com.claude.session-sync.plist"
-    local label="com.claude.session-sync"
+    local plist_path="$HOME/Library/LaunchAgents/com.opencode.session-sync.plist"
+    local label="com.opencode.session-sync"
 
     if [[ -f "$plist_path" ]]; then
         echo "Unloading launchd job..."
@@ -42,5 +42,5 @@ else
 fi
 
 echo ""
-echo "Note: Log file preserved at ~/.claude/session-sync.log"
-echo "Note: Indexed sessions preserved at ~/.claude/qmd-sessions/"
+echo "Note: Log file preserved at ~/.opencode/session-sync.log"
+echo "Note: Indexed sessions preserved at ~/.opencode/qmd-sessions/"

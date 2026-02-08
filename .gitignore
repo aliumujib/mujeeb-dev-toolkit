@@ -1,7 +1,21 @@
-.claude/.current_session
-__pycache__/
+# OpenCode
+.opencode/.current_session
+.opencode/node_modules/
+.opencode/bun.lock
+.opencode/*.local.md
+
+# Legacy Claude Code (not used, should not exist)
+.claude/
+
+# Legacy Claude Code (archived)
+.claude-legacy/
+
+# Python
 __pycache__/
 
 # Blog post drafts
 BLOG-*.md
 session-*.svg
+
+# Dev log (local planning notes)
+devlog/

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Background session indexing - called by launchd every 30 min
 #
-# Runs incremental sync and embedding. Logs to ~/.claude/session-sync.log
+# Runs incremental sync and embedding. Logs to ~/.opencode/session-sync.log
 # Safe to run concurrently (sync script handles locking internally)
 
 set -euo pipefail
 
-LOG_FILE="$HOME/.claude/session-sync.log"
+LOG_FILE="$HOME/.opencode/session-sync.log"
 MAX_LOG_SIZE=1048576  # 1MB
 
 # Cross-platform filesize (GNU/BSD stat).

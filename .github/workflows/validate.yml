@@ -1,0 +1,291 @@
+name: Validate OpenCode Plugin
+
+on:
+  push:
+    branches: [main, feat/*]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-structure:
+    name: Validate Plugin Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required directories exist
+        run: |
+          echo "Checking required directories..."
+          dirs=(".opencode/commands" ".opencode/skills" ".opencode/agents" ".opencode/plugins")
+          for dir in "${dirs[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "❌ Missing directory: $dir"
+              exit 1
+            fi
+            echo "✓ $dir exists"
+          done
+
+      - name: Check required config files exist
+        run: |
+          echo "Checking required config files..."
+          files=("opencode.json" "AGENTS.md" "package.json" ".opencode/package.json")
+          for file in "${files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing file: $file"
+              exit 1
+            fi
+            echo "✓ $file exists"
+          done
+
+      - name: Validate opencode.json is valid JSON
+        run: |
+          echo "Validating opencode.json..."
+          cat opencode.json | jq . > /dev/null
+          echo "✓ opencode.json is valid JSON"
+
+      - name: Validate package.json is valid JSON
+        run: |
+          echo "Validating package.json..."
+          cat package.json | jq . > /dev/null
+          echo "✓ package.json is valid JSON"
+
+  validate-commands:
+    name: Validate Commands
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check command files have frontmatter
+        run: |
+          echo "Checking command frontmatter..."
+          for file in .opencode/commands/*.md; do
+            if [ -f "$file" ]; then
+              # Check for YAML frontmatter (starts with ---)
+              if ! head -1 "$file" | grep -q "^---"; then
+                echo "❌ $file missing YAML frontmatter"
+                exit 1
+              fi
+              # Check for description field
+              if ! grep -q "^description:" "$file"; then
+                echo "❌ $file missing 'description' field"
+                exit 1
+              fi
+              echo "✓ $file has valid frontmatter"
+            fi
+          done
+
+      - name: List all commands
+        run: |
+          echo "Commands found:"
+          ls -1 .opencode/commands/*.md | xargs -I{} basename {} .md | sort
+
+  validate-skills:
+    name: Validate Skills
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check skill files have required frontmatter
+        run: |
+          echo "Checking skill frontmatter..."
+          for dir in .opencode/skills/*/; do
+            skill_file="$dir/SKILL.md"
+            if [ -f "$skill_file" ]; then
+              skill_name=$(basename "$dir")
+              
+              # Check for YAML frontmatter
+              if ! head -1 "$skill_file" | grep -q "^---"; then
+                echo "❌ $skill_file missing YAML frontmatter"
+                exit 1
+              fi
+              
+              # Check for name field
+              if ! grep -q "^name:" "$skill_file"; then
+                echo "❌ $skill_file missing 'name' field"
+                exit 1
+              fi
+              
+              # Check for description field
+              if ! grep -q "^description:" "$skill_file"; then
+                echo "❌ $skill_file missing 'description' field"
+                exit 1
+              fi
+              
+              # Check name matches directory (OpenCode requirement)
+              declared_name=$(grep "^name:" "$skill_file" | head -1 | sed 's/name: *//')
+              if [ "$declared_name" != "$skill_name" ]; then
+                echo "❌ $skill_file: name '$declared_name' doesn't match directory '$skill_name'"
+                exit 1
+              fi
+              
+              echo "✓ $skill_name has valid frontmatter"
+            fi
+          done
+
+      - name: List all skills
+        run: |
+          echo "Skills found:"
+          ls -1d .opencode/skills/*/ | xargs -I{} basename {}
+
+  validate-agents:
+    name: Validate Agents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check agent files have required frontmatter
+        run: |
+          echo "Checking agent frontmatter..."
+          for file in .opencode/agents/*.md; do
+            if [ -f "$file" ]; then
+              # Check for YAML frontmatter
+              if ! head -1 "$file" | grep -q "^---"; then
+                echo "❌ $file missing YAML frontmatter"
+                exit 1
+              fi
+              
+              # Check for name field
+              if ! grep -q "^name:" "$file"; then
+                echo "❌ $file missing 'name' field"
+                exit 1
+              fi
+              
+              # Check for description field
+              if ! grep -q "^description:" "$file"; then
+                echo "❌ $file missing 'description' field"
+                exit 1
+              fi
+              
+              # Check for mode field (should be subagent for these)
+              if ! grep -q "^mode:" "$file"; then
+                echo "❌ $file missing 'mode' field"
+                exit 1
+              fi
+              
+              echo "✓ $(basename $file) has valid frontmatter"
+            fi
+          done
+
+      - name: List all agents
+        run: |
+          echo "Agents found:"
+          ls -1 .opencode/agents/*.md | xargs -I{} basename {} .md
+
+  validate-plugins:
+    name: Validate Plugins (TypeScript)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          cd .opencode
+          bun install
+
+      - name: Type check plugins
+        run: |
+          cd .opencode
+          echo "Type checking plugins..."
+          for file in plugins/*.ts; do
+            if [ -f "$file" ] && [ "$(basename $file)" != "index.ts" ]; then
+              echo "Checking $file..."
+              bun build "$file" --outdir=/tmp/plugin-build --target=bun
+              if [ $? -ne 0 ]; then
+                echo "❌ $file failed to compile"
+                exit 1
+              fi
+              echo "✓ $file compiles successfully"
+            fi
+          done
+
+      - name: Check plugin exports
+        run: |
+          cd .opencode
+          echo "Checking plugin exports..."
+          
+          # Check git-guard exports GitGuardPlugin
+          if ! grep -q "export.*GitGuardPlugin" plugins/git-guard.ts; then
+            echo "❌ git-guard.ts missing GitGuardPlugin export"
+            exit 1
+          fi
+          echo "✓ git-guard.ts exports GitGuardPlugin"
+          
+          # Check session-start exports SessionStartPlugin
+          if ! grep -q "export.*SessionStartPlugin" plugins/session-start.ts; then
+            echo "❌ session-start.ts missing SessionStartPlugin export"
+            exit 1
+          fi
+          echo "✓ session-start.ts exports SessionStartPlugin"
+          
+          # Check loop-controller exports LoopControllerPlugin
+          if ! grep -q "export.*LoopControllerPlugin" plugins/loop-controller.ts; then
+            echo "❌ loop-controller.ts missing LoopControllerPlugin export"
+            exit 1
+          fi
+          echo "✓ loop-controller.ts exports LoopControllerPlugin"
+
+      - name: List all plugins
+        run: |
+          echo "Plugins found:"
+          ls -1 .opencode/plugins/*.ts
+
+  validate-scripts:
+    name: Validate Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check scripts are executable or have shebang
+        run: |
+          echo "Checking shell scripts..."
+          for file in scripts/*; do
+            if [ -f "$file" ]; then
+              # Check for shebang
+              if head -1 "$file" | grep -qE "^#!.*(bash|sh|zsh)"; then
+                echo "✓ $(basename $file) has valid shebang"
+              elif [ -x "$file" ]; then
+                echo "✓ $(basename $file) is executable"
+              else
+                echo "⚠ $(basename $file) may not be executable (no shebang, not +x)"
+              fi
+            fi
+          done
+
+      - name: Shellcheck scripts (if available)
+        run: |
+          if command -v shellcheck &> /dev/null; then
+            echo "Running shellcheck..."
+            for file in scripts/*.sh; do
+              if [ -f "$file" ]; then
+                shellcheck "$file" || echo "⚠ shellcheck warnings in $file"
+              fi
+            done
+          else
+            echo "shellcheck not installed, skipping"
+          fi
+
+  summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-structure, validate-commands, validate-skills, validate-agents, validate-plugins, validate-scripts]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Print summary
+        run: |
+          echo "========================================="
+          echo "       OpenCode Plugin Validation       "
+          echo "========================================="
+          echo ""
+          echo "📁 Commands:  $(ls -1 .opencode/commands/*.md 2>/dev/null | wc -l | tr -d ' ')"
+          echo "📚 Skills:    $(ls -1d .opencode/skills/*/ 2>/dev/null | wc -l | tr -d ' ')"
+          echo "🤖 Agents:    $(ls -1 .opencode/agents/*.md 2>/dev/null | wc -l | tr -d ' ')"
+          echo "🔌 Plugins:   $(ls -1 .opencode/plugins/*.ts 2>/dev/null | wc -l | tr -d ' ')"
+          echo "📜 Scripts:   $(ls -1 scripts/* 2>/dev/null | wc -l | tr -d ' ')"
+          echo ""
+          echo "✅ All validations passed!"

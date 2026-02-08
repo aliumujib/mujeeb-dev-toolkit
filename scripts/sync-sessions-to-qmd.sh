@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sync-sessions-to-qmd.sh - Sync Claude Code sessions to qmd-indexable markdown
+# sync-sessions-to-qmd.sh - Sync OpenCode sessions to qmd-indexable markdown
 #
 # Usage:
 #   ./sync-sessions-to-qmd.sh [--full]
@@ -15,8 +15,8 @@
 
 set -euo pipefail
 
-OUTPUT_DIR="$HOME/.claude/qmd-sessions"
-PROJECTS_DIR="$HOME/.claude/projects"
+OUTPUT_DIR="$HOME/.opencode/qmd-sessions"
+PROJECTS_DIR="$HOME/.opencode/projects"
 
 # Parse arguments
 MODE="incremental"
@@ -428,7 +428,7 @@ process_all_sessions() {
   local total=0
   local processed=0
 
-  echo "Syncing Claude Code sessions to qmd..."
+  echo "Syncing OpenCode sessions to qmd..."
   echo "Mode: $MODE"
   echo ""
 

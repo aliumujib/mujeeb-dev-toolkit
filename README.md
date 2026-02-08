@@ -1,15 +1,35 @@
-# somto-dev-toolkit
+# mujeeb-dev-toolkit
 
-Personal collection of Claude Code tools and skills.
+Personal collection of OpenCode tools, skills, commands, and plugins for iterative development workflows.
 
 ## Installation
 
-```
-/plugin marketplace add SomtoUgeh/somto-dev-toolkit
-/plugin install somto-dev-toolkit@somto-dev-toolkit
+### Option 1: npm (recommended)
+
+Add to your `opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-mujeeb-toolkit"]
+}
 ```
 
-## Commands (13)
+### Option 2: Git clone
+
+Clone into your project's `.opencode` directory:
+
+```bash
+git clone https://github.com/aliumujib/mujeeb-dev-toolkit .opencode
+```
+
+Or clone globally:
+
+```bash
+git clone https://github.com/aliumujib/mujeeb-dev-toolkit ~/.config/opencode
+```
+
+## Commands (11)
 
 ### Loop Commands
 
@@ -35,22 +55,19 @@ Personal collection of Claude Code tools and skills.
 | `/ut-help` | Explain the unit test loop technique |
 | `/e2e-help` | Explain the E2E test loop technique |
 
-### Session & Utility Commands
+### Utility Commands
 
 | Command | Description |
 |---------|-------------|
-| `/setup-memory` | Setup smart session memory system |
 | `/deslop` | Remove AI-generated code slop from branch |
-| `/setup-git-guard` | Install git safety guard hook |
 | `/gwt` | Manage git worktrees using sibling directories |
-| `/setup-gwt` | Install the gwt script |
 
 ## Agents (2)
 
 | Agent | Description |
 |-------|-------------|
 | `prd-codebase-researcher` | Research codebase patterns for PRD development |
-| `prd-external-researcher` | Research external best practices using Exa |
+| `prd-external-researcher` | Research external best practices |
 
 ## Skills (9)
 
@@ -66,20 +83,19 @@ Personal collection of Claude Code tools and skills.
 | `gwt` | Git worktree management using sibling directories |
 | `background-agents` | Patterns for parallel background agents |
 
-## Hooks (6)
+## Plugins (3)
 
-| Event | Purpose |
-|-------|---------|
-| `SessionStart` | Initialize session state |
-| `Stop` | Enforce iterative workflows (ut/e2e/prd loops) |
-| `SubagentStop` | Validate research agent outputs |
-| `PreToolUse` | Git safety guard + memory injection (requires qmd) |
-| `UserPromptSubmit` | Fork suggestion for similar past sessions (requires qmd) |
+| Plugin | Purpose |
+|--------|---------|
+| `git-guard` | Blocks destructive git/shell commands |
+| `session-start` | Records session info for loop state |
+| `loop-controller` | Enforces phased workflows (PRD/UT/E2E loops) |
 
 ## Usage Examples
 
 ### PRD-based Development
-```
+
+```bash
 /prd "add user authentication"
 # Interview process generates spec with Implementation Stories
 # Phase 4 creates Dex tasks automatically
@@ -90,52 +106,51 @@ dex list --pending
 ```
 
 ### Unit Test Coverage
-```
+
+```bash
 /ut "improve coverage for auth module" --target 80%
 # Phase 1: Coverage analysis, identify gaps
 # Phase 2: Create Dex tasks for each gap
+
 # Work on tasks:
 dex list --pending
 /complete <task-id>
 ```
 
 ### E2E Testing
-```
+
+```bash
 /e2e "add checkout flow tests"
 # Phase 1: Flow analysis, identify critical paths
 # Phase 2: Create Dex tasks per flow
+
 # Work on tasks:
 dex list --pending
 /complete <task-id>
 ```
 
-### Git Safety Guard
-```
-/setup-git-guard project  # or 'user' for global
-```
+## External Dependencies
 
-### Session Memory (requires qmd)
-```
-# One-time setup
-/setup-memory
+Some features require external tools:
 
-# Or manually:
-brew install qmd  # macOS
-cargo install qmd  # Linux/WSL
+| Tool | Purpose | Install |
+|------|---------|---------|
+| **dex** | Task management CLI | `npm install -g @dcramer/dex` |
+| **qmd** | Session memory search | `brew install qmd` or `cargo install qmd` |
 
-qmd init -c claude-sessions ~/.claude/qmd-sessions
+### Session Memory (optional, requires qmd)
+
+Once qmd is installed:
+
+```bash
+# Initialize qmd collection
+qmd init -c claude-sessions ~/.opencode/qmd-sessions
+
+# Sync sessions
+./scripts/sync-sessions-to-qmd.sh
+
+# Set up scheduled sync (optional)
 ./scripts/setup-scheduled-sync.sh
-```
-
-Once configured:
-- **PreToolUse**: Injects relevant past session context when using Read/Edit/Write/Glob/Grep
-- **UserPromptSubmit**: Suggests forking when starting similar work
-
-## Updating
-
-```
-/plugin marketplace update
-/plugin update somto-dev-toolkit@somto-dev-toolkit
 ```
 
 ## Platform Support
@@ -145,6 +160,47 @@ Once configured:
 | macOS | Full | launchd for scheduling |
 | Linux | Full | cron for scheduling |
 | WSL | Full | cron (ensure `sudo service cron start`) |
+
+## Configuration
+
+The toolkit uses `opencode.json` for configuration. Key settings:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "permission": {
+    "bash": {
+      "git reset --hard*": "deny",
+      "rm -rf*": "ask"
+    }
+  }
+}
+```
+
+## Development
+
+### Project Structure
+
+```
+.opencode/
+├── commands/       # Slash commands (/prd, /ut, etc.)
+├── skills/         # Reusable instruction sets
+├── agents/         # Specialized AI helpers
+├── plugins/        # Background automation (TS)
+└── package.json    # Plugin dependencies
+
+scripts/            # Shell scripts for setup
+opencode.json       # Main config
+AGENTS.md           # Always-loaded rules
+```
+
+### Contributing
+
+1. Clone the repo
+2. Make changes to `.opencode/` files
+3. Test locally by using this as your project's `.opencode/` directory
+4. Submit a PR
 
 ## License
 

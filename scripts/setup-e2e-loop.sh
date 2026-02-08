@@ -112,17 +112,17 @@ TEST_COMMAND="npx playwright test"
 # Detect E2E folder
 E2E_FOLDER=$(detect_e2e_folder)
 
-# Create .claude directory if needed
-mkdir -p .claude
+# Create .opencode directory if needed
+mkdir -p .opencode
 
 # Read session_id
-SESSION_ID=$(cat .claude/.current_session 2>/dev/null || echo "default")
+SESSION_ID=$(cat .opencode/.current_session 2>/dev/null | jq -r '.session_id // "default"' 2>/dev/null || echo "default")
 
 # Branch setup - prompt user if on main/master
 prompt_feature_branch "test/e2e-coverage"
 
 # Create state file for hook routing
-STATE_FILE=".claude/e2e-loop-${SESSION_ID}.local.md"
+STATE_FILE=".opencode/e2e-loop-${SESSION_ID}.local.md"
 cat > "$STATE_FILE" <<EOF
 ---
 loop_type: "e2e"

@@ -18,13 +18,13 @@ source "$SCRIPT_DIR/lib/loop-helpers.sh"
 # Parse arguments
 INPUT="${*:-}"
 
-# Create .claude directory if needed
-mkdir -p .claude
+# Create .opencode directory if needed
+mkdir -p .opencode
 
 # Read session_id from SessionStart hook
-SESSION_ID=$(cat .claude/.current_session 2>/dev/null || echo "default")
+SESSION_ID=$(cat .opencode/.current_session 2>/dev/null | jq -r '.session_id // "default"' 2>/dev/null || echo "default")
 
-STATE_FILE=".claude/prd-loop-${SESSION_ID}.local.md"
+STATE_FILE=".opencode/prd-loop-${SESSION_ID}.local.md"
 
 # Classify input FIRST (before branch setup needs feature name)
 INPUT_TYPE="empty"
@@ -152,42 +152,33 @@ EOF
     ;;
 esac
 
-# Validate hooks are configured
-validate_hooks() {
-  local settings_file="$HOME/.claude/settings.json"
-  local project_settings=".claude/settings.local.json"
-  local hook_found=false
+# Validate plugins are configured
+validate_plugins() {
+  local plugins_dir=".opencode/plugins"
+  local plugin_found=false
 
-  # Check global settings
-  if [[ -f "$settings_file" ]]; then
-    if jq -e '.hooks.Stop // empty' "$settings_file" >/dev/null 2>&1; then
-      hook_found=true
+  # Check if loop-controller plugin exists
+  if [[ -f "$plugins_dir/loop-controller.ts" ]]; then
+    plugin_found=true
+  fi
+
+  # Check opencode.json for plugin configuration
+  if [[ -f "opencode.json" ]]; then
+    if jq -e '.plugins // empty | length > 0' opencode.json >/dev/null 2>&1; then
+      plugin_found=true
     fi
   fi
 
-  # Check project settings
-  if [[ -f "$project_settings" ]]; then
-    if jq -e '.hooks.Stop // empty' "$project_settings" >/dev/null 2>&1; then
-      hook_found=true
-    fi
-  fi
-
-  # Check if this plugin is installed (hooks come from plugin)
-  local plugin_root="${CLAUDE_PLUGIN_ROOT:-}"
-  if [[ -n "$plugin_root" ]] && [[ -f "$plugin_root/hooks/stop_hook.sh" ]]; then
-    hook_found=true
-  fi
-
-  if [[ "$hook_found" != "true" ]]; then
+  if [[ "$plugin_found" != "true" ]]; then
     echo ""
-    echo "WARNING: Stop hook may not be configured."
-    echo "   PRD phase transitions require the stop hook."
-    echo "   Ensure somto-dev-toolkit plugin is installed or hooks are configured."
+    echo "WARNING: Loop controller plugin may not be configured."
+    echo "   PRD phase transitions require the loop-controller plugin."
+    echo "   Ensure .opencode/plugins/loop-controller.ts exists."
     echo ""
   fi
 }
 
-validate_hooks
+validate_plugins
 
 # Output setup message
 cat <<EOF

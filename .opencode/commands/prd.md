@@ -1,0 +1,256 @@
+---
+description: Deep interview to build PRD for new features or enhancements
+agent: build
+---
+
+# PRD Loop
+
+Execute the setup script to initialize the PRD loop:
+
+```bash
+!`./scripts/setup-prd.sh $ARGUMENTS`
+```
+
+You are now in a phased PRD workflow. Follow the phases below based on **structured output markers**.
+
+---
+
+## Branch Setup (Handled by Setup Script)
+
+When starting on main/master, the setup script prompts:
+1. "Create a feature branch?" [1/2]
+2. If yes, prompts for branch name (default: `feat/<feature-name>`)
+3. Creates branch before loop starts
+
+---
+
+## Structured Output Control Flow
+
+Use **file existence as primary truth** (ralph-loop pattern). Markers are for explicit control. If you complete the work but forget the marker, detect file existence and auto-advance (where allowed).
+
+### Phase Transition Table
+
+| Phase | Name | Required Marker | Attributes | Next Phase |
+|-------|------|-----------------|------------|------------|
+| 1 | Input Classification | `<phase_complete phase="1"/>` | `feature_name` (required) | 2 |
+| 2 | Interview + Exploration | `<phase_complete phase="2"/>` | none | 3 |
+| 3 | Spec Write | `<phase_complete phase="3"/>` | `spec_path` (required) | 4 |
+| 4 | Dex Handoff | `<phase_complete phase="4"/>` | none | done |
+
+### Detection Priority (File > Marker)
+
+1. **File existence is truth** - If `plans/<feature>/spec.md` exists, phase 3 is considered complete
+2. **Markers are explicit signals** - Still work and take precedence when present
+3. **Last marker wins** - If docs/examples contain markers, only the LAST occurrence counts
+4. **Auto-discovery** - Paths follow convention: `plans/<feature>/spec.md`
+
+### CRITICAL: Marker Placement
+
+**Phase markers MUST be the LAST thing in your response.** If you output a marker then make a tool call, the marker won't be detected.
+
+Correct:
+```
+[Complete phase work]
+[Final summary text]
+<phase_complete phase="2"/>
+```
+
+Wrong:
+```
+<phase_complete phase="2"/>
+[Tool call after marker] <- Marker missed!
+```
+
+### File-Based Auto-Advance
+
+| Phase | Auto-Advances When |
+|-------|-------------------|
+| 3 | `plans/<feature>/spec.md` exists with stories section |
+| 4 | Dex tasks created for all stories |
+
+### Exact Marker Formats
+
+```xml
+<!-- Phase 1 -->
+<phase_complete phase="1" feature_name="auth-feature"/>
+
+<!-- Phase 2 -->
+<phase_complete phase="2"/>
+
+<!-- Phase 3 -->
+<phase_complete phase="3" spec_path="plans/auth-feature/spec.md"/>
+
+<!-- Phase 4 -->
+<phase_complete phase="4"/>
+```
+
+---
+
+## Phase Details
+
+### Phase 1: Input Classification
+
+Classify input type (empty/file/folder/idea) and extract feature context.
+
+**Output:** `<phase_complete phase="1" feature_name="SLUG"/>` where SLUG is lowercase-hyphenated.
+
+### Phase 2: Interview + Exploration
+
+**Commitment:** "I will ask 8-10+ questions covering: core problem, success criteria, MVP scope, technical constraints, UX flows, edge cases, error states, and tradeoffs. After interview, I will run research agents to inform the spec."
+
+Conduct thorough interview:
+
+#### Interview (8-10+ questions across these areas):
+- **Core** - Problem statement, success criteria, MVP scope
+- **Technical** - Systems, data models, existing patterns
+- **UX/UI** - User flows, error states, edge cases
+- **Tradeoffs** - Compromises, priorities, constraints
+
+#### After Interview Complete, Run Agents (blocking)
+
+Spawn ALL agents IN PARALLEL (single message, multiple Task calls). User waits ~2-3 min while agents research.
+
+**Research Agents:**
+```
+Task 1: @prd-codebase-researcher (explore the codebase for patterns)
+Task 2: @explore (analyze git history for prior attempts)
+Task 3: @prd-external-researcher (research best practices)
+```
+
+#### Review Findings
+
+After agents complete, summarize key findings briefly.
+
+**If findings reveal gaps:**
+1. Ask clarifying questions
+2. Wait for user response
+3. THEN output the marker in your next response
+
+**If no gaps:**
+Output the marker immediately.
+
+**IMPORTANT:** The marker must be the LAST thing in your response with NO tool calls after it.
+
+**Output:** `<phase_complete phase="2"/>`
+
+### Phase 3: Spec Write
+
+Write comprehensive spec to `plans/<feature>/spec.md`. Include a structured stories section for Dex parsing.
+
+**Spec Structure:**
+```markdown
+# <Feature> Specification
+
+## Overview
+## Problem Statement
+## Success Criteria
+## User Stories (As a X, I want Y, so that Z)
+## Detailed Requirements
+### Functional Requirements
+### Non-Functional Requirements
+### UI/UX Specifications
+## Technical Design
+### Data Models
+### API Contracts
+### System Interactions
+### Implementation Notes
+## Edge Cases & Error Handling
+## Open Questions
+## Out of Scope
+
+## Implementation Stories
+
+### Story 1: <Title>
+**Category:** functional|ui|integration|edge-case|performance
+**Skills:** <skill-name>, <skill-name>
+**Blocked by:** none
+**Acceptance Criteria:**
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+### Story 2: <Title>
+**Category:** <category>
+**Skills:** <skills or none>
+**Blocked by:** Story 1
+**Acceptance Criteria:**
+- [ ] ...
+
+## Research Findings
+## Expert Review Findings
+## References
+```
+
+**Story Size Rules:**
+- Each story = ONE task (~15-30 min work)
+- Max 7 acceptance criteria - if more, split
+- Max 3 files touched - if more, consider splitting
+- No "and" in title - "User can X and Y" = two stories
+- Independently testable, cleanly revertible
+
+**Marker:** After writing the spec file, output the marker with NO tool calls after it:
+```
+<phase_complete phase="3" spec_path="plans/<feature>/spec.md"/>
+```
+
+### Phase 4: Dex Handoff
+
+Use `dex plan` to create tasks from the spec's Implementation Stories section.
+
+**Steps:**
+
+1. Parse spec and create tasks:
+```bash
+dex plan plans/<feature>/spec.md
+```
+
+This automatically:
+- Creates parent task from spec title
+- Analyzes Implementation Stories section
+- Creates subtasks for each story with context
+- Reports task IDs and structure
+
+2. Add blocked-by relationships if needed:
+```bash
+# If stories have dependencies (from "Blocked by:" in spec):
+dex edit <story2-id> --add-blocker <story1-id>
+```
+
+3. Verify tasks created:
+```bash
+dex status
+dex list
+```
+
+4. Ask user what's next:
+"PRD complete! Dex tasks created. What next?"
+
+Options:
+- **Start first task** - Begin implementation
+- **Done** - Review PRD first, implement later
+
+5. **AFTER user responds**, output the completion marker:
+- If "Done": Output `<promise>PRD COMPLETE</promise>`
+- If "Start first task": Output `<phase_complete phase="4"/>` then begin implementation
+
+**IMPORTANT:** The marker/promise must be output AFTER the user responds, not before.
+
+---
+
+## Key Principles
+
+**Production Quality Always** - Every line will be maintained by others.
+
+**Be Annoyingly Thorough** - Better 20 questions than one missed detail.
+
+**Non-Obvious > Obvious** - Focus on edge cases, error states, tradeoffs.
+
+**Expert Input Early** - Run reviewers during exploration, not after spec is done.
+
+**Atomic Stories** - Each story = ONE thing, ONE task. Independently testable, cleanly revertible.
+
+---
+
+## Cancellation
+
+To cancel: `/cancel-prd` or `rm .opencode/prd-loop-*.local.md`
