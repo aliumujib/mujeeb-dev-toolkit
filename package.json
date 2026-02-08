@@ -1,0 +1,28 @@
+{
+  "name": "opencode-mujeeb-toolkit",
+  "version": "1.0.0",
+  "description": "OpenCode plugin with iterative loop workflows (PRD, unit tests, E2E), session memory, git safety, and Dex task management",
+  "author": "Ali Umujib",
+  "license": "MIT",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "prd",
+    "workflow",
+    "dex",
+    "testing",
+    "git-safety"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aliumujib/mujeeb-dev-toolkit"
+  },
+  "files": [
+    ".opencode/",
+    "scripts/",
+    "opencode.json",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "main": ".opencode/plugins/index.ts"
+}
