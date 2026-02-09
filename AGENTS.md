@@ -51,3 +51,24 @@ Some features require external tools:
 - Pre-commit reviews required (code-simplifier)
 - Verify work with tests before marking complete
 - Result must include concrete verification, not vague claims
+
+## Known Issues
+
+### todowrite/question tools broken with array parameters (OpenCode Issue #7512)
+
+Tools with array/object parameters (`todowrite`, `question`, etc.) fail with Zod validation errors:
+```
+Error: expected array, received string
+```
+
+**Root cause:** LLMs serialize array parameters as JSON strings (`"[{...}]"`) instead of actual arrays (`[{...}]`).
+
+**Status:** Fix in progress (PR #7513), not yet merged.
+
+**Workaround:** Track tasks manually in conversation or use markdown files until fix is merged.
+
+**Affected tools:**
+- `todowrite` (todos array)
+- `question` (questions array)  
+- `browser_fill_form` (fields array)
+- Any MCP tool with array/object parameters
