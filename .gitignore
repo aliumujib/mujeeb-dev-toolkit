@@ -3,6 +3,7 @@
 .opencode/node_modules/
 .opencode/bun.lock
 .opencode/*.local.md
+.opencode/.video-frames/
 
 # Legacy Claude Code (not used, should not exist)
 .claude/
