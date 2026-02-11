@@ -209,9 +209,14 @@ discover_projects() {
   if [[ -d "$OPENCODE_STORAGE" ]]; then
     while IFS= read -r project_file; do
       if [[ -f "$project_file" ]]; then
+        # Skip global.json (we handle $HOME separately)
+        [[ "$(basename "$project_file")" == "global.json" ]] && continue
+        
         local worktree
         worktree=$(jq -r '.worktree // empty' "$project_file" 2>/dev/null)
-        if [[ -n "$worktree" && -d "$worktree" ]]; then
+        
+        # Skip empty, root, or non-existent paths
+        if [[ -n "$worktree" && "$worktree" != "/" && -d "$worktree" ]]; then
           projects+=("$worktree")
         fi
       fi
