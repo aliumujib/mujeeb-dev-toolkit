@@ -4,6 +4,7 @@
   "small_model": "anthropic/claude-haiku-4-20250514",
   "theme": "opencode",
   "autoupdate": true,
+  "plugin": [".opencode/plugins/index.ts"],
   "permission": {
     "edit": "allow",
     "bash": {

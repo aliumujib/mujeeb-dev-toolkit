@@ -52,7 +52,7 @@ fi
 
 # Get plugin root (relative to this script)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SYNC_SCRIPT="$SCRIPT_DIR/sync-sessions-to-qmd.sh"
+SYNC_SCRIPT="$SCRIPT_DIR/sync-opencode-sessions.sh"
 
 if [[ ! -x "$SYNC_SCRIPT" ]]; then
     log "Sync script not found: $SYNC_SCRIPT"

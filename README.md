@@ -83,12 +83,13 @@ git clone https://github.com/aliumujib/mujeeb-dev-toolkit ~/.config/opencode
 | `gwt` | Git worktree management using sibling directories |
 | `background-agents` | Patterns for parallel background agents |
 
-## Plugins (3)
+## Plugins (4)
 
 | Plugin | Purpose |
 |--------|---------|
 | `git-guard` | Blocks destructive git/shell commands |
 | `session-start` | Records session info for loop state |
+| `session-context-inject` | Injects relevant past session context via qmd |
 | `loop-controller` | Enforces phased workflows (PRD/UT/E2E loops) |
 
 ## Usage Examples
@@ -144,10 +145,10 @@ Once qmd is installed:
 
 ```bash
 # Initialize qmd collection
-qmd init -c claude-sessions ~/.opencode/qmd-sessions
+qmd init -c opencode-sessions ~/.opencode/qmd-sessions
 
 # Sync sessions
-./scripts/sync-sessions-to-qmd.sh
+./scripts/sync-opencode-sessions.sh
 
 # Set up scheduled sync (optional)
 ./scripts/setup-scheduled-sync.sh
@@ -169,6 +170,7 @@ The toolkit uses `opencode.json` for configuration. Key settings:
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "anthropic/claude-sonnet-4-20250514",
+  "plugin": [".opencode/plugins/index.ts"],
   "permission": {
     "bash": {
       "git reset --hard*": "deny",
@@ -177,6 +179,90 @@ The toolkit uses `opencode.json` for configuration. Key settings:
   }
 }
 ```
+
+## Setup
+
+### Enabling Plugins (Git Guard, Session Injection, etc.)
+
+Plugins must be explicitly registered in your `opencode.json`. Add the `plugin` array:
+
+```json
+{
+  "plugin": [".opencode/plugins/index.ts"]
+}
+```
+
+This enables:
+- **Git Guard** - Blocks destructive commands like `git reset --hard`, `git push --force`, `rm -rf`
+- **Session Context Injection** - Queries past sessions for relevant context (requires qmd)
+- **Loop Controller** - Enforces phased workflows for PRD/UT/E2E commands
+
+### Session Memory Setup (Optional)
+
+Session memory allows OpenCode to recall relevant context from past conversations. This requires the `qmd` tool.
+
+**Step 1: Install qmd**
+
+```bash
+# macOS
+brew install qmd
+
+# Or via Cargo
+cargo install qmd
+```
+
+**Step 2: Initialize the sessions collection**
+
+```bash
+qmd init -c opencode-sessions ~/.opencode/qmd-sessions
+```
+
+**Step 3: Sync existing sessions**
+
+```bash
+./scripts/sync-opencode-sessions.sh
+```
+
+**Step 4: (Optional) Set up scheduled sync**
+
+This automatically syncs new sessions periodically:
+
+```bash
+./scripts/setup-scheduled-sync.sh
+```
+
+Once configured, the `session-context-inject` plugin will automatically query past sessions for relevant context when you start new conversations.
+
+### Global Installation
+
+To use the toolkit across all projects, create symlinks in `~/.config/opencode/`:
+
+```bash
+# Create config directory if needed
+mkdir -p ~/.config/opencode
+
+# Symlink components
+ln -s /path/to/mujeeb-dev-toolkit/.opencode/commands ~/.config/opencode/commands
+ln -s /path/to/mujeeb-dev-toolkit/.opencode/skills ~/.config/opencode/skills
+ln -s /path/to/mujeeb-dev-toolkit/.opencode/agents ~/.config/opencode/agents
+ln -s /path/to/mujeeb-dev-toolkit/.opencode/plugins ~/.config/opencode/plugins
+
+# Copy or symlink config files
+cp /path/to/mujeeb-dev-toolkit/opencode.json ~/.config/opencode/opencode.json
+cp /path/to/mujeeb-dev-toolkit/AGENTS.md ~/.config/opencode/AGENTS.md
+```
+
+### Troubleshooting
+
+**Git Guard not blocking commands?**
+- Ensure `"plugin": [".opencode/plugins/index.ts"]` is in your `opencode.json`
+- Check that the `.opencode/plugins/` directory exists
+
+**Session injection not working?**
+1. Verify qmd is installed: `command -v qmd`
+2. Check sessions directory exists: `ls ~/.opencode/qmd-sessions`
+3. Run sync script: `./scripts/sync-opencode-sessions.sh`
+4. Ensure plugin is registered in `opencode.json`
 
 ## Development
 
