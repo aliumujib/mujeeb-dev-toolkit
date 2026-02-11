@@ -145,10 +145,10 @@ Once qmd is installed:
 
 ```bash
 # Initialize qmd collection
-qmd init -c claude-sessions ~/.opencode/qmd-sessions
+qmd init -c opencode-sessions ~/.opencode/qmd-sessions
 
 # Sync sessions
-./scripts/sync-sessions-to-qmd.sh
+./scripts/sync-opencode-sessions.sh
 
 # Set up scheduled sync (optional)
 ./scripts/setup-scheduled-sync.sh
@@ -214,13 +214,13 @@ cargo install qmd
 **Step 2: Initialize the sessions collection**
 
 ```bash
-qmd init -c claude-sessions ~/.opencode/qmd-sessions
+qmd init -c opencode-sessions ~/.opencode/qmd-sessions
 ```
 
 **Step 3: Sync existing sessions**
 
 ```bash
-./scripts/sync-sessions-to-qmd.sh
+./scripts/sync-opencode-sessions.sh
 ```
 
 **Step 4: (Optional) Set up scheduled sync**
@@ -261,7 +261,7 @@ cp /path/to/mujeeb-dev-toolkit/AGENTS.md ~/.config/opencode/AGENTS.md
 **Session injection not working?**
 1. Verify qmd is installed: `command -v qmd`
 2. Check sessions directory exists: `ls ~/.opencode/qmd-sessions`
-3. Run sync script: `./scripts/sync-sessions-to-qmd.sh`
+3. Run sync script: `./scripts/sync-opencode-sessions.sh`
 4. Ensure plugin is registered in `opencode.json`
 
 ## Development

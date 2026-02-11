@@ -6,8 +6,8 @@
  * 
  * Setup:
  * 1. Install qmd
- * 2. Initialize collection: qmd init -c claude-sessions ~/.opencode/qmd-sessions
- * 3. Sync sessions: ./scripts/sync-sessions-to-qmd.sh
+ * 2. Initialize collection: qmd init -c opencode-sessions ~/.opencode/qmd-sessions
+ * 3. Sync sessions: ./scripts/sync-opencode-sessions.sh
  */
 
 import type { Plugin } from "@opencode-ai/plugin"
@@ -35,7 +35,7 @@ function isQmdInitialized(): boolean {
 function queryQmd(query: string, limit: number = 3): string | null {
   try {
     const result = execSync(
-      `qmd search -c claude-sessions -n ${limit} "${query.replace(/"/g, '\\"')}"`,
+      `qmd search -c opencode-sessions -n ${limit} "${query.replace(/"/g, '\\"')}"`,
       {
         cwd: QMD_SESSIONS_DIR,
         stdio: ["pipe", "pipe", "pipe"],
@@ -72,7 +72,7 @@ export const SessionContextInjectPlugin: Plugin = async ({ client, directory }) 
       body: {
         service: "session-context-inject",
         level: "warn",
-        message: `qmd sessions not initialized. Run: qmd init -c claude-sessions ${QMD_SESSIONS_DIR}`,
+        message: `qmd sessions not initialized. Run: qmd init -c opencode-sessions ${QMD_SESSIONS_DIR}`,
       },
     })
   }
