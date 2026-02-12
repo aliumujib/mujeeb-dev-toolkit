@@ -199,19 +199,32 @@ EOF
   echo "  ✓ $session_id: $title"
 }
 
-# Project directories to scan for sessions
-# Add your project paths here
-PROJECT_DIRS=(
-  "$HOME"
-  "$HOME/Desktop/Android-Projects/mclaren-fanapp-android"
-  "$HOME/Desktop/Anna/anna-android"
-  "$HOME/Desktop/Android-Projects/amjb_apps/focus-modes"
-  "$HOME/Desktop/Android-Projects/amjb_apps/lawnchair"
-  "$HOME/Desktop/Android-Projects/amjb_apps/lessscreen"
-  "$HOME/Desktop/Android-Projects/amjb_apps/memory"
-  "$HOME/Desktop/Android-Projects/amjb_apps/WidgetsPro"
-  "$HOME/Desktop/Android-Projects/amjb_apps/mujeeb-dev-toolkit"
-)
+# OpenCode project registry location
+OPENCODE_STORAGE="$HOME/.local/share/opencode/storage/project"
+
+# Discover project directories from OpenCode registry
+discover_projects() {
+  local projects=("$HOME")  # Always include global/home
+  
+  if [[ -d "$OPENCODE_STORAGE" ]]; then
+    while IFS= read -r project_file; do
+      if [[ -f "$project_file" ]]; then
+        # Skip global.json (we handle $HOME separately)
+        [[ "$(basename "$project_file")" == "global.json" ]] && continue
+        
+        local worktree
+        worktree=$(jq -r '.worktree // empty' "$project_file" 2>/dev/null)
+        
+        # Skip empty, root, or non-existent paths
+        if [[ -n "$worktree" && "$worktree" != "/" && -d "$worktree" ]]; then
+          projects+=("$worktree")
+        fi
+      fi
+    done < <(find "$OPENCODE_STORAGE" -name "*.json" -type f 2>/dev/null)
+  fi
+  
+  printf '%s\n' "${projects[@]}"
+}
 
 # Sync sessions from a single project directory
 sync_project_sessions() {
@@ -273,12 +286,18 @@ main() {
   echo "Mode: $MODE"
   echo ""
 
-  # Process each project directory
-  for project_dir in "${PROJECT_DIRS[@]}"; do
-    if [[ -d "$project_dir" ]]; then
-      sync_project_sessions "$project_dir"
-    fi
-  done
+  # Discover projects from OpenCode registry
+  echo "Discovering projects from OpenCode registry..."
+  local project_count=0
+  
+  while IFS= read -r project_dir; do
+    [[ -z "$project_dir" ]] && continue
+    ((project_count++)) || true
+    sync_project_sessions "$project_dir"
+  done < <(discover_projects)
+  
+  echo ""
+  echo "Scanned $project_count projects"
 
   # Count total synced
   local processed

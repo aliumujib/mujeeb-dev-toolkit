@@ -4,6 +4,6 @@
   "description": "OpenCode plugin dependencies for mujeeb-dev-toolkit",
   "dependencies": {
     "yaml": "^2.3.4",
-    "@opencode-ai/plugin": "1.1.56"
+    "@opencode-ai/plugin": "1.1.59"
   }
 }

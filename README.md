@@ -223,6 +223,8 @@ qmd init -c opencode-sessions ~/.opencode/qmd-sessions
 ./scripts/sync-opencode-sessions.sh
 ```
 
+> **Note:** Projects are automatically discovered from OpenCode's registry at `~/.local/share/opencode/storage/project/`. No manual configuration needed - any project you've opened in OpenCode will be synced.
+
 **Step 4: (Optional) Set up scheduled sync**
 
 This automatically syncs new sessions periodically:
