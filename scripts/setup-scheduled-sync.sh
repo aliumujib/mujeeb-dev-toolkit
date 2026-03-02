@@ -37,9 +37,9 @@ install_launchd() {
         launchctl unload "$plist_path" 2>/dev/null || true
     fi
 
-    # Get PATH for qmd (include common locations for macOS)
+    # Get PATH for qmd and opencode (include common locations for macOS)
     local path_value
-    path_value="$HOME/.bun/bin:$HOME/.local/bin:$HOME/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+    path_value="$HOME/.opencode/bin:$HOME/.bun/bin:$HOME/.local/bin:$HOME/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
     # Write plist
     cat > "$plist_path" << EOF
@@ -85,8 +85,8 @@ EOF
 }
 
 install_cron() {
-    # Build PATH that includes common qmd install locations for Linux/WSL
-    local path_value="$HOME/.bun/bin:$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin"
+    # Build PATH that includes common qmd and opencode install locations for Linux/WSL
+    local path_value="$HOME/.opencode/bin:$HOME/.bun/bin:$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin"
     local cron_cmd="*/30 * * * * PATH=$path_value $SYNC_SCRIPT >> $HOME/.opencode/session-sync.log 2>&1"
     local cron_marker="# claude-session-sync"
 

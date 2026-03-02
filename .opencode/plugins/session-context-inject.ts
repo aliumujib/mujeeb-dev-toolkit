@@ -78,15 +78,22 @@ export const SessionContextInjectPlugin: Plugin = async ({ client, directory }) 
   }
 
   return {
-    "message.created": async ({ message }) => {
-      // Only process user messages
-      if (message.role !== "user") return
-
+    // Inject context by transforming messages before they're sent to LLM
+    "experimental.chat.messages.transform": async (input, output) => {
       // Skip if qmd not available
       if (!qmdInstalled || !qmdInitialized) return
 
-      // Extract text content from message
-      const textContent = message.parts
+      // Find the last user message
+      const userMessages = output.messages
+        .filter((msg) => msg.info.role === "user")
+        .reverse()
+
+      if (userMessages.length === 0) return
+
+      const lastUserMsg = userMessages[0]
+
+      // Extract text content
+      const textContent = lastUserMsg.parts
         .filter((part): part is { type: "text"; text: string } => part.type === "text")
         .map((part) => part.text)
         .join(" ")
@@ -97,26 +104,43 @@ export const SessionContextInjectPlugin: Plugin = async ({ client, directory }) 
         // Query qmd for relevant past context
         const context = queryQmd(textContent)
 
-        if (context) {
+        if (context && context !== "No results found.") {
           const truncatedContext = truncateContext(context, MAX_CONTEXT_CHARS)
 
           await client.app.log({
             body: {
               service: "session-context-inject",
               level: "info",
-              message: `Injected ${truncatedContext.length} chars of past session context`,
+              message: `Injected ${truncatedContext.length} chars of past session context for query: ${textContent.substring(0, 50)}...`,
             },
           })
 
-          // Add context as a system message
-          // Note: This creates a system reminder with past context
-          return {
-            systemReminder: `<past-session-context>
+          // Prepend context as a system-like message
+          output.messages.unshift({
+            info: {
+              role: "user",
+              time: { created: Date.now(), updated: Date.now() },
+              id: "context-injection",
+            } as any,
+            parts: [
+              {
+                type: "text",
+                text: `<system-reminder><past-session-context>
 The following is relevant context from past sessions that may help with the current request:
 
 ${truncatedContext}
-</past-session-context>`,
-          }
+</past-session-context></system-reminder>`,
+              } as any,
+            ],
+          })
+        } else {
+          await client.app.log({
+            body: {
+              service: "session-context-inject",
+              level: "debug",
+              message: `No relevant past sessions found for: ${textContent.substring(0, 50)}...`,
+            },
+          })
         }
       } catch (error) {
         await client.app.log({
