@@ -2,27 +2,9 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "anthropic/claude-sonnet-4-20250514",
   "small_model": "anthropic/claude-haiku-4-20250514",
+  "theme": "opencode",
   "autoupdate": true,
   "plugin": [".opencode/plugins/index.ts"],
-  "mcp": {
-    "cipher": {
-      "type": "local",
-      "command": ["/Users/aliumujib/.local/share/cipher-mcp/run-cipher.sh", "--mode", "mcp"],
-      "enabled": true,
-      "environment": {
-        "OPENAI_API_KEY": "",
-        "GEMINI_API_KEY": "",
-        "OLLAMA_BASE_URL": "http://localhost:11434",
-        "OLLAMA_EMBEDDING_MODEL": "nomic-embed-text",
-        "MCP_SERVER_MODE": "aggregator",
-        "VECTOR_STORE_TYPE": "in-memory",
-        "VECTOR_STORE_DIMENSION": "768",
-        "SEARCH_MEMORY_TYPE": "both",
-        "STORAGE_DATABASE_TYPE": "sqlite",
-        "STORAGE_DATABASE_PATH": "/Users/aliumujib/.local/share/cipher-mcp/data/cipher.db"
-      }
-    }
-  },
   "permission": {
     "edit": "allow",
     "bash": {
