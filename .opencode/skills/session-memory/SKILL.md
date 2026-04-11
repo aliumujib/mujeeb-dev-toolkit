@@ -1,3 +1,8 @@
+---
+name: session-memory
+description: Import past OpenCode sessions into Cipher for semantic search across your development history.
+---
+
 # Session Memory Skill
 
 Import past OpenCode sessions into Cipher for semantic search across your development history.

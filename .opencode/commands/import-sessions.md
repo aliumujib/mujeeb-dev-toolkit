@@ -1,3 +1,8 @@
+---
+description: Import OpenCode sessions into Cipher memory for semantic search
+agent: cipher
+---
+
 # /import-sessions
 
 Import OpenCode sessions into Cipher memory for semantic search.
