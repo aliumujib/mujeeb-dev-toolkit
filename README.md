@@ -92,6 +92,30 @@ git clone https://github.com/aliumujib/mujeeb-dev-toolkit ~/.config/opencode
 | `session-context-inject` | Injects relevant past session context via qmd |
 | `loop-controller` | Enforces phased workflows (PRD/UT/E2E loops) |
 
+## Hermes Integrations
+
+This repo also contains Hermes-native integration bundles that are separate from
+the OpenCode plugins.
+
+### Life OS
+
+Sanitized export bundle:
+
+- `integrations/hermes/life-os/`
+
+What it contains:
+
+- current architecture docs
+- Telegram interaction/button design docs
+- Hermes plugin manifest and skill
+- env-driven placeholder config via `settings.example.env`
+
+Important:
+
+- this bundle is sanitized for reuse
+- it does not include live personal IDs, names, NAS references, or secrets
+- rehydrate it with real environment variables in the target deployment
+
 ## Usage Examples
 
 ### PRD-based Development

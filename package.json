@@ -19,6 +19,7 @@
   },
   "files": [
     ".opencode/",
+    "integrations/",
     "scripts/",
     "opencode.json",
     "AGENTS.md",

@@ -1,0 +1,10 @@
+name: life-os
+version: 0.1.0
+description: Life OS planning and Notion orchestration for Telegram-driven personal operations
+provides_tools:
+  - life_os_get_context
+  - life_os_create_task
+  - life_os_extract_weekly_outcomes
+  - life_os_run_job
+provides_hooks:
+  - pre_llm_call
